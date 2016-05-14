@@ -24,7 +24,7 @@ module EditDistance where
          | otherwise = minimum [
             (table ! (i, j + 1)) + 1,
             (table ! (i + 1, j)) + 1,
-            if (x ! i) == (y ! j) then table ! (i + 1, j) + 1
+            if (x ! i) == (y ! j) then table ! (i + 1, j + 1)
               else table ! (i + 1, j + 1) + 1
             ]   
        
