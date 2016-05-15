@@ -13,23 +13,20 @@ module EditDistance where
          
       table = mkArray dist ar_bounds    
       frem = FRem 5 (\x -> Regular 1)
+      fadd = FAdd 2 (\x -> Regular 1)
       
       dist::(Int, Int) -> Infinitable Int
       dist (i, j) 
          | i > xl || j > yl   = PositiveInfinity
          | i == xl && j == yl = Regular 0
-         | i == xl            = Regular (yl - j)
-         | otherwise = minimum ([
-            if j /= yl 
-              then (table ! (i, j + 1)) + 1
-              else PositiveInfinity,
-            
-            if j /= yl 
+         | otherwise = minimum ([           
+            if j /= yl && i /= xl
               then if (x ! i) == (y ! j)  
                 then table ! (i + 1, j + 1)
                 else (table ! (i + 1, j + 1)) + 1
               else PositiveInfinity
-            ] ++ remOptions table frem x (i, j))
+            ] ++ remOptions table frem x (i, j) 
+              ++ addOptions table fadd y (i, j))
                
 
    data FRem a = FRem Int ([a] -> Infinitable Int)
@@ -43,4 +40,11 @@ module EditDistance where
        lastDeleted = minimum [length xs - 1, i + maxlf - 1]
        maxIDeleted = lastDeleted - i;
        maxSubstring = subArrayToList xs (i, lastDeleted)
+       
+   addOptions :: Array (Int, Int) (Infinitable Int) -> FAdd a -> Array Int a -> (Int, Int) -> [Infinitable Int]
+   addOptions ar (FAdd maxlf fadd) ys (i, j) = [ (ar ! (i, j + x + 1)) + fadd (take x maxSubstring) | x <- [0..maxIAdded]]
+     where 
+       lastAdded = minimum [length ys - 1, j + maxlf - 1]
+       maxIAdded = lastAdded - j;
+       maxSubstring = subArrayToList ys (i, lastAdded)
   
