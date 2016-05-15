@@ -1,1 +1,1 @@
-A haskell implementation of Edit Distance alghoritm. 
+A haskell implementation of Edit Distance algorithm. 
