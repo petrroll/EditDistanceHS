@@ -3,7 +3,12 @@ module EditDistance where
    import InfinitySupport
    import OtherHelpers
    
-   editDistance :: Eq a => [a] -> [a] -> Infinitable Int
+   type DistScore = (Infinitable Int)
+   type MemtableIndex = (Int, Int)
+   type Memtable = Array MemtableIndex DistScore
+
+   
+   editDistance :: Eq a => [a] -> [a] -> DistScore
    editDistance xs ys = table ! (0, 0) where
       x = listToArray xs
       y = listToArray ys
@@ -15,7 +20,7 @@ module EditDistance where
       frem = FUn 5 (\x -> Regular 1)
       fadd = FUn 2 (\x -> Regular 1)
       
-      dist::(Int, Int) -> Infinitable Int
+      dist::MemtableIndex->DistScore
       dist (i, j) 
          | i > xl || j > yl   = PositiveInfinity
          | i == xl && j == yl = Regular 0
@@ -25,23 +30,23 @@ module EditDistance where
                 then table ! (i + 1, j + 1)
                 else (table ! (i + 1, j + 1)) + 1
               else PositiveInfinity
-            ] ++ modOptions table Horizontal frem x (i, j) 
-              ++ modOptions table Vertical fadd y (i, j))
+            ] ++ modOptions table Del frem x (i, j) 
+              ++ modOptions table Add fadd y (i, j))
                
 
-   data FUn a = FUn Int ([a] -> Infinitable Int)
-   data FBin a = FBin Int ([a] -> [a] -> Infinitable Int)   
-   data Direction = Horizontal | Vertical deriving (Eq)
+   data FUn a = FUn Int ([a] -> DistScore)
+   data FBin a = FBin Int ([a] -> [a] -> DistScore)   
+   data Op = Del | Add deriving (Eq)
    
 
-   modOptions :: Array (Int, Int) (Infinitable Int) -> Direction -> FUn a -> Array Int a -> (Int, Int) -> [Infinitable Int]
+   modOptions :: Memtable -> Op -> FUn a -> Array Int a -> MemtableIndex -> [DistScore]
    modOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! (getIndex (i, j) x)) + fmod (take x maxSubstring) | x <- [0..maxIModified]]
      where 
        lastModified = minimum [length str - 1, currPos + maxlf - 1]
        maxIModified = lastModified - currPos;
        maxSubstring = subArrayToList str (currPos, lastModified)
-       currPos | dir == Horizontal = i
-               | otherwise         = j
-       getIndex (i, j) x | dir == Horizontal = (i + x + 1, j)
-                         | otherwise         = (i, j + x + 1)
+       currPos | dir == Del = i
+               | otherwise  = j
+       getIndex (i, j) x | dir == Del = (i + x + 1, j)
+                         | otherwise  = (i, j + x + 1)
        
