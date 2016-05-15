@@ -5,8 +5,8 @@ module EditDistance where
    
    editDistance :: Eq a => [a] -> [a] -> Infinitable Int
    editDistance xs ys = table ! (0, 0) where
-      x        = array (0, xl) (zip [0..] xs)
-      y        = array (0, yl) (zip [0..] ys)
+      x = listToArray xs
+      y = listToArray ys
        
       (xl, yl) = (length xs, length ys)      
       ar_bounds   = ((0, 0), (xl, yl))

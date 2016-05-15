@@ -10,3 +10,7 @@ module OtherHelpers where
    applyOnSuffixes :: ([a] -> b) -> [a] -> [b]
    applyOnSuffixes _ []            = []
    applyOnSuffixes fun list@(x:xs) = fun list : applyOnSuffixes fun xs
+   
+   listToArray :: [a] -> Array Int a
+   listToArray list = array (0, length list) (zip [0..] list)
+   
