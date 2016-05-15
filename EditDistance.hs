@@ -7,19 +7,24 @@ module EditDistance where
    type MemtableIndex = (Int, Int)
    type Memtable = Array MemtableIndex DistScore
 
+
+     
+   editDistanceDef :: Eq a => [a] -> [a] -> DistScore
+   editDistanceDef x y = editDistance frem fadd fbin x y
+    where 
+      frem = FUn 1 (\x -> Regular 1)
+      fadd = FUn 1 (\x -> Regular 1)
+      fbin = FBin (1,1) (\x y -> if x == y then Regular 0 else Regular 1)
    
-   editDistance :: Eq a => [a] -> [a] -> DistScore
-   editDistance xs ys = table ! (0, 0) where
+   editDistance :: Eq a => FUn a -> FUn a -> FBin a -> [a] -> [a] -> DistScore
+   editDistance frem fadd fbin xs ys = table ! (0, 0) where
       x = listToArray xs
       y = listToArray ys
        
       (xl, yl) = (length xs, length ys)      
       ar_bounds   = ((0, 0), (xl, yl))
          
-      table = mkArray dist ar_bounds    
-      frem = FUn 5 (\x -> Regular 5)
-      fadd = FUn 2 (\x -> Regular 5)
-      fbin = FBin (1,1) (\x y -> if x == y then Regular 0 else Regular 1)
+      table = mkArray dist ar_bounds
       
       dist::MemtableIndex->DistScore
       dist (i, j) 
@@ -51,7 +56,7 @@ module EditDistance where
        getIndex (i, j) x | dir == Del = (i + x, j)
                          | otherwise  = (i, j + x)
                          
-                         
+                                         
    binModOptions :: Memtable -> FBin a -> Array Int a -> Array Int a -> MemtableIndex -> [DistScore]
    binModOptions ar (FBin (maxlxf, maxlyf) fmod) strX strY (i, j) = [ (ar ! (i + x, j + y)) + funcMod x y | x <- [1..maxModifiedX], y <- [1..maxModifiedY]]
      where 
