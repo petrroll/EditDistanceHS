@@ -15,8 +15,9 @@ module EditDistance where
       
       dist::(Int, Int) -> Infinitable Int
       dist (i, j) 
-         | i == xl = Regular (yl - j)
-         | j == yl = Regular (xl - i)
+         | i > xl || j > yl = PositiveInfinity
+         | i == xl          = Regular (yl - j)
+         | j == yl          = Regular (xl - i)
          | otherwise = minimum [
             (table ! (i, j + 1)) + 1,
             (table ! (i + 1, j)) + 1,
