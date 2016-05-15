@@ -22,9 +22,10 @@ module EditDistance where
             (table ! (i + 1, j)) + 1,
             if (x ! i) == (y ! j) then table ! (i + 1, j + 1)
               else (table ! (i + 1, j + 1)) + 1
-            ]   
-       
-
-      
+            ]
+               
    
-   
+   data FRem a b = FRem Int ([a] -> b)
+   data FAdd a b = FAdd Int ([a] -> b)
+   data FMod a b = FMod Int ([a] -> [a] -> b)      
+  
