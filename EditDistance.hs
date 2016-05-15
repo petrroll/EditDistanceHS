@@ -17,24 +17,23 @@ module EditDistance where
       ar_bounds   = ((0, 0), (xl, yl))
          
       table = mkArray dist ar_bounds    
-      frem = FUn 5 (\x -> Regular 1)
-      fadd = FUn 2 (\x -> Regular 1)
+      frem = FUn 5 (\x -> Regular 5)
+      fadd = FUn 2 (\x -> Regular 5)
+      fbin = FBin (1,1) (\x y -> if x == y then Regular 0 else Regular 1)
       
       dist::MemtableIndex->DistScore
       dist (i, j) 
          | i > xl || j > yl   = PositiveInfinity
          | i == xl && j == yl = Regular 0
-         | otherwise = minimum ([           
-            if j /= yl && i /= xl
-              then if (x ! i) == (y ! j)  
-                then table ! (i + 1, j + 1)
-                else (table ! (i + 1, j + 1)) + 1
-              else PositiveInfinity
-            ] ++ delOptions (i, j) 
-              ++ addOptions (i, j))
+         | otherwise = minimum (
+              delOptions (i, j) 
+              ++ addOptions (i, j)
+              ++ modOptions (i, j)
+          )
           where 
             delOptions = unModOptions table Del frem x
             addOptions = unModOptions table Add fadd y
+            modOptions = binModOptions table fbin x y 
                
 
    data FUn a = FUn Int ([a] -> DistScore)
@@ -51,5 +50,23 @@ module EditDistance where
                | otherwise  = j
        getIndex (i, j) x | dir == Del = (i + x, j)
                          | otherwise  = (i, j + x)
+                         
+                         
+   binModOptions :: Memtable -> FBin a -> Array Int a -> Array Int a -> MemtableIndex -> [DistScore]
+   binModOptions ar (FBin (maxlxf, maxlyf) fmod) strX strY (i, j) = [ (ar ! (i + x, j + y)) + funcMod x y | x <- [1..maxModifiedX], y <- [1..maxModifiedY]]
+     where 
+       lastModified str ind maxfl = minimum [length str - 1, ind + maxfl - 1] 
+       lastModifiedX = lastModified strX  i maxlxf
+       lastModifiedY = lastModified strY  j maxlyf
+       
+       maxModifiedX  = lastModifiedX - i + 1;
+       maxModifiedY  = lastModifiedY - j + 1;
+       
+       maxSubstringX = subArrayToList strX (i, lastModifiedX)
+       maxSubstringY = subArrayToList strY (j, lastModifiedY)
+       funcMod x y = fmod (take x maxSubstringX) (take y maxSubstringY)
+       
+                         
+                         
 
                                                                                                       
