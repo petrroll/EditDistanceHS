@@ -6,45 +6,37 @@ module EditDistance where
    
    mkArray :: (Ix a) => (a -> b) -> (a,a) -> Array a b
    mkArray f bnds = array bnds [(i, f i) | i <- range bnds]
-     
-   data Infinitable a = Regular a | NegativeInfinity | PositiveInfinity deriving (Eq, Show)
+   
+   data Infinitable a = Regular a | PositiveInfinity deriving (Eq, Show)
 
    instance Ord a => Ord (Infinitable a) where
-      compare NegativeInfinity NegativeInfinity = EQ
       compare PositiveInfinity PositiveInfinity = EQ
-      compare NegativeInfinity _ = LT
       compare PositiveInfinity _ = GT
       compare _ PositiveInfinity = LT
-      compare _ NegativeInfinity = GT
       compare (Regular x) (Regular y) = compare x y    
    
-   instance Num a => Num (Infinitable a) where
-      negate NegativeInfinity = PositiveInfinity
-      negate PositiveInfinity = NegativeInfinity
+   instance (Eq a, Num a) => Num (Infinitable a) where
+      negate PositiveInfinity = error "Unsupported operation"
       negate (Regular a) = Regular (negate a)
       
       (+) PositiveInfinity _ = PositiveInfinity
       (+) _ PositiveInfinity = PositiveInfinity
-      (+) NegativeInfinity _ = NegativeInfinity
-      (+) _ NegativeInfinity = NegativeInfinity
       (+) (Regular a) (Regular b) = Regular (a + b)
       
-      (*) PositiveInfinity _ = error "Unimplemented"
-      (*) _ PositiveInfinity = error "Unimplemented"
-      (*) NegativeInfinity _ = error "Unimplemented"
-      (*) _ NegativeInfinity = error "Unimplemented"
+      (*) PositiveInfinity b | signum b == Regular 1 = PositiveInfinity
+                             | otherwise = error "Unsupported operation"
+                        
+      (*) a PositiveInfinity | signum a == Regular 1 = PositiveInfinity
+                             | otherwise = error "Unsupported operation"                                            
       (*) (Regular a) (Regular b) = Regular (a * b)
       
       fromInteger a = Regular (fromInteger a)
-      
-      abs NegativeInfinity = PositiveInfinity
+
       abs PositiveInfinity = PositiveInfinity
       abs (Regular a) = Regular (abs a)
-      
-      signum NegativeInfinity = -1
-      signum PositiveInfinity = 1
+
+      signum PositiveInfinity = Regular 1
       signum (Regular a) = Regular (signum a)
-   
    editDistance :: Eq a => [a] -> [a] -> Infinitable Int
    editDistance xs ys = table ! (0, 0) where
       x        = array (0, xl) (zip [0..] xs)
