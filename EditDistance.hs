@@ -30,17 +30,17 @@ module EditDistance where
                 then table ! (i + 1, j + 1)
                 else (table ! (i + 1, j + 1)) + 1
               else PositiveInfinity
-            ] ++ modOptions table Del frem x (i, j) 
-              ++ modOptions table Add fadd y (i, j))
+            ] ++ unModOptions table Del frem x (i, j) 
+              ++ unModOptions table Add fadd y (i, j))
                
 
    data FUn a = FUn Int ([a] -> DistScore)
    data FBin a = FBin Int ([a] -> [a] -> DistScore)   
-   data Op = Del | Add deriving (Eq)
+   data UnOp = Del | Add deriving (Eq)
    
 
-   modOptions :: Memtable -> Op -> FUn a -> Array Int a -> MemtableIndex -> [DistScore]
-   modOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! (getIndex (i, j) x)) + fmod (take x maxSubstring) | x <- [0..maxIModified]]
+   unModOptions :: Memtable -> UnOp -> FUn a -> Array Int a -> MemtableIndex -> [DistScore]
+   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! (getIndex (i, j) x)) + fmod (take x maxSubstring) | x <- [0..maxIModified]]
      where 
        lastModified = minimum [length str - 1, currPos + maxlf - 1]
        maxIModified = lastModified - currPos;
