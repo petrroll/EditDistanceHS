@@ -38,17 +38,18 @@ module EditDistance where
                
 
    data FUn a = FUn Int ([a] -> DistScore)
-   data FBin a = FBin Int ([a] -> [a] -> DistScore)   
+   data FBin a = FBin (Int, Int) ([a] -> [a] -> DistScore)   
    data UnOp = Del | Add deriving (Eq)
    
    unModOptions :: Memtable -> UnOp -> FUn a -> Array Int a -> MemtableIndex -> [DistScore]
-   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! (getIndex (i, j) x)) + fmod (take x maxSubstring) | x <- [0..maxIModified]]
+   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! (getIndex (i, j) x)) + fmod (take x maxSubstring) | x <- [1..maxModified]]
      where 
        lastModified = minimum [length str - 1, currPos + maxlf - 1]
-       maxIModified = lastModified - currPos;
+       maxModified  = lastModified - currPos + 1;
        maxSubstring = subArrayToList str (currPos, lastModified)
        currPos | dir == Del = i
                | otherwise  = j
-       getIndex (i, j) x | dir == Del = (i + x + 1, j)
-                         | otherwise  = (i, j + x + 1)                                               
-       
+       getIndex (i, j) x | dir == Del = (i + x, j)
+                         | otherwise  = (i, j + x)
+
+                                                                                                      
