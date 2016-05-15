@@ -6,3 +6,7 @@ module OtherHelpers where
    
    mkArray :: (Ix a) => (a -> b) -> (a,a) -> Array a b
    mkArray f bnds = array bnds [(i, f i) | i <- range bnds]
+   
+   applyOnSuffixes :: ([a] -> b) -> [a] -> [b]
+   applyOnSuffixes _ []            = []
+   applyOnSuffixes fun list@(x:xs) = fun list : applyOnSuffixes fun xs
