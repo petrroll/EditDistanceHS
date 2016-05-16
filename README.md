@@ -41,7 +41,17 @@ advEDSetup "abb" "a"
 advEDSetup "abc" "a"
 
 ````
+
 Tests
 -----
-There're also two sets of tests in `Tests.hs`. They can be run by calling `advTests` and `simpleTests` respectively.
+There're also two sets of 'tests' in `Tests.hs`. They can be run by calling `advTests` and `simpleTests` respectively.
 
+Disclaimer
+-----
+This script was written as a final project for a semester long course "Non-procedural programming" at [MFF CUNI](http://www.mff.cuni.cz/) 
+and is therefore neither the-best optimized nor generally the best implementation of edit distance algorithm in haskell there is. Use 
+at own risk.
+
+Licence
+-----
+[MIT](https://opensource.org/licenses/MIT)
