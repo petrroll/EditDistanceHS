@@ -3,7 +3,12 @@ module InfinitySupport where
    --Data type adding infinity support 
    data Infinitable a = Regular a | PositiveInfinity deriving (Eq, Show)
 
-   --Function transforming Infinitable type into Maybe type, natural numbers are Just, PositiveInfinity is Nothing
+   --Transforms Infinitable type into Maybe type, natural numbers are Just, PositiveInfinity is Nothing
+   infinitableToMaybe :: Infinitable a -> Maybe a
+   infinitableToMaybe (Regular a) = Just a
+   infinitableToMaybe PositiveInfinity = Nothing
+   
+   --Transforms Maybe type into Infinitable type, Just are natural numbers, Nothing is PositiveInfinity
    infinitableToMaybe :: Infinitable a -> Maybe a
    infinitableToMaybe (Regular a) = Just a
    infinitableToMaybe PositiveInfinity = Nothing

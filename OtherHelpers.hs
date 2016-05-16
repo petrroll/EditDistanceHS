@@ -22,7 +22,7 @@ module OtherHelpers (subArrayToList, emptyArray, mkArray, applyOnSuffixes, listT
    listToArray :: [a] -> Array Int a
    listToArray list = array (0, length list - 1) (zip [0..] list)
    
-   --Helper method that returns one-based index of the first not-true element in an array or zero if all are true                           
+   --Returns one-based index of the first not-true element in an array or zero if all are true                           
    testIfTrue :: [Bool] -> Int
    testIfTrue = testIfTrueSup 1
     
