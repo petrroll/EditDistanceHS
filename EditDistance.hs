@@ -7,17 +7,17 @@ module EditDistance where
    type MemtableIndex = (Int, Int)
    type Memtable = Array MemtableIndex DistScore
 
-
+    
      
-   editDistanceDef :: Eq a => [a] -> [a] -> DistScore
+   editDistanceDef :: Eq a => [a] -> [a] -> Maybe Int
    editDistanceDef x y = editDistance frem fadd fbin x y
     where 
       frem = FUn 1 (\x -> Regular 1)
       fadd = FUn 1 (\x -> Regular 1)
       fbin = FBin (1,1) (\x y -> if x == y then Regular 0 else Regular 1)
    
-   editDistance :: Eq a => FUn a -> FUn a -> FBin a -> [a] -> [a] -> DistScore
-   editDistance frem fadd fbin xs ys = table ! (0, 0) where
+   editDistance :: Eq a => FUn a -> FUn a -> FBin a -> [a] -> [a] -> Maybe Int
+   editDistance frem fadd fbin xs ys = infinitableToMaybe $ table ! (0, 0) where
       x = listToArray xs
       y = listToArray ys
        

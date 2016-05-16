@@ -2,6 +2,10 @@ module InfinitySupport where
     
    data Infinitable a = Regular a | PositiveInfinity deriving (Eq, Show)
 
+   infinitableToMaybe :: Infinitable a -> Maybe a
+   infinitableToMaybe (Regular a) = Just a
+   infinitableToMaybe PositiveInfinity = Nothing
+
    instance Ord a => Ord (Infinitable a) where
       compare PositiveInfinity PositiveInfinity = EQ
       compare PositiveInfinity _ = GT
