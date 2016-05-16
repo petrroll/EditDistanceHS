@@ -9,9 +9,11 @@ module EditDistance where
    type Memtable = Array MemtableIndex DistScore
    
    --Data types used for definition of custom remove, add, and modify scoring functions 
-   data FUn a = FUn Int ([a] -> Maybe Int) 
-   data FBin a = FBin (Int, Int) ([a] -> [a] -> Maybe Int)   
-   data UnOp = Del | Add deriving (Eq)
+   data FUn a = FUn Int ([a] -> Maybe Int) --The first argument is the maximum length the function accepts (e.g. the maximum number of chars that can be deleted)
+   data FBin a = FBin (Int, Int) ([a] -> [a] -> Maybe Int) --The first argument is a touple of two values, the maximum length of a list that can be changed and the maximum length of a list that can be changed into
+   
+   --Just a local enum type for differentiation between remove and add functions
+   data UnOp = Del | Add deriving (Eq) 
    
    --Default edit distance function that uses regular scoring functions 
    editDistanceDef :: Eq a => [a] -> [a] -> Maybe Int
@@ -51,16 +53,16 @@ module EditDistance where
    
    --Creates a list of all possibilities for unary modification function (removal, addition) starting at current index 
    unModOptions :: Memtable -> UnOp -> FUn a -> Array Int a -> MemtableIndex -> [DistScore]
-   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! getIndex (i, j) x) + funcValue x | x <- [1..maxModified]]
+   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! getIndex (i, j) x) + funcValue x | x <- [1..maxModified]] --Creates a list of scores of all possible modifications + the score of corresponding following entry in memoization table
      where 
-       lastModified = minimum [length str - 1, currPos + maxlf - 1]
-       maxModified  = lastModified - currPos + 1;
-       maxSubstring = subArrayToList str (currPos, lastModified)
-       currPos | dir == Del = i
+       lastModified = minimum [length str - 1, currPos + maxlf - 1] --An index of the last item that can be possibly changed
+       maxModified  = lastModified - currPos + 1; --The maximum number of elements that can be changed
+       maxSubstring = subArrayToList str (currPos, lastModified) --Maximum substring that can be changed
+       currPos | dir == Del = i --Defines whether we're changing the original string or the desired one (i.e are we adding or removing)
                | otherwise  = j
        getIndex (i, j) x | dir == Del = (i + x, j)
                          | otherwise  = (i, j + x)
-       funcValue x = maybeToInfinity $ fmod (take x maxSubstring)
+       funcValue x = maybeToInfinity $ fmod (take x maxSubstring) --Function that retrieves the score for particular length of substring
                          
    --Creates a list of all possibilities for binary modification function (modification) starting at current index                                       
    binModOptions :: Memtable -> FBin a -> Array Int a -> Array Int a -> MemtableIndex -> [DistScore]
