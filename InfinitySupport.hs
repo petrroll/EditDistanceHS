@@ -9,9 +9,9 @@ module InfinitySupport where
    infinitableToMaybe PositiveInfinity = Nothing
    
    --Transforms Maybe type into Infinitable type, Just are natural numbers, Nothing is PositiveInfinity
-   infinitableToMaybe :: Infinitable a -> Maybe a
-   infinitableToMaybe (Regular a) = Just a
-   infinitableToMaybe PositiveInfinity = Nothing
+   maybeToInfinity :: Maybe a -> Infinitable a
+   maybeToInfinity (Just a) = Regular a
+   maybeToInfinity Nothing = PositiveInfinity
 
    --Adding support for Ord operations on Infinitable type
    instance Ord a => Ord (Infinitable a) where

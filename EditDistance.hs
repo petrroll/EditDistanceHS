@@ -9,17 +9,17 @@ module EditDistance where
    type Memtable = Array MemtableIndex DistScore
    
    --Data types used for definition of custom remove, add, and modify scoring functions 
-   data FUn a = FUn Int ([a] -> DistScore) 
-   data FBin a = FBin (Int, Int) ([a] -> [a] -> DistScore)   
+   data FUn a = FUn Int ([a] -> Maybe Int) 
+   data FBin a = FBin (Int, Int) ([a] -> [a] -> Maybe Int)   
    data UnOp = Del | Add deriving (Eq)
    
    --Default edit distance function that uses regular scoring functions 
    editDistanceDef :: Eq a => [a] -> [a] -> Maybe Int
    editDistanceDef = editDistance frem fadd fbin
     where 
-      frem = FUn 1 (\x -> Regular 1)
-      fadd = FUn 1 (\x -> Regular 1)
-      fbin = FBin (1,1) (\x y -> if x == y then Regular 0 else Regular 1)
+      frem = FUn 1 (\x -> Just 1)
+      fadd = FUn 1 (\x -> Just 1)
+      fbin = FBin (1,1) (\x y -> if x == y then Just 0 else Just 1)
    
    --Generic edit distance function that accepts definition of custom remove, add, and modify scoring functions
    editDistance :: Eq a => FUn a -> FUn a -> FBin a -> [a] -> [a] -> Maybe Int
@@ -51,7 +51,7 @@ module EditDistance where
    
    --Creates a list of all possibilities for unary modification function (removal, addition) starting at current index 
    unModOptions :: Memtable -> UnOp -> FUn a -> Array Int a -> MemtableIndex -> [DistScore]
-   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! getIndex (i, j) x) + fmod (take x maxSubstring) | x <- [1..maxModified]]
+   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! getIndex (i, j) x) + funcValue x | x <- [1..maxModified]]
      where 
        lastModified = minimum [length str - 1, currPos + maxlf - 1]
        maxModified  = lastModified - currPos + 1;
@@ -60,10 +60,11 @@ module EditDistance where
                | otherwise  = j
        getIndex (i, j) x | dir == Del = (i + x, j)
                          | otherwise  = (i, j + x)
+       funcValue x = maybeToInfinity $ fmod (take x maxSubstring)
                          
    --Creates a list of all possibilities for binary modification function (modification) starting at current index                                       
    binModOptions :: Memtable -> FBin a -> Array Int a -> Array Int a -> MemtableIndex -> [DistScore]
-   binModOptions ar (FBin (maxlxf, maxlyf) fmod) strX strY (i, j) = [ (ar ! (i + x, j + y)) + funcMod x y | x <- [1..maxModifiedX], y <- [1..maxModifiedY]]
+   binModOptions ar (FBin (maxlxf, maxlyf) fmod) strX strY (i, j) = [ (ar ! (i + x, j + y)) + funcValue x y | x <- [1..maxModifiedX], y <- [1..maxModifiedY]]
      where 
        lastModified str ind maxfl = minimum [length str - 1, ind + maxfl - 1] 
        lastModifiedX = lastModified strX  i maxlxf
@@ -74,7 +75,7 @@ module EditDistance where
        
        maxSubstringX = subArrayToList strX (i, lastModifiedX)
        maxSubstringY = subArrayToList strY (j, lastModifiedY)
-       funcMod x y = fmod (take x maxSubstringX) (take y maxSubstringY)
+       funcValue x y = maybeToInfinity $ fmod (take x maxSubstringX) (take y maxSubstringY)
        
                          
                          
