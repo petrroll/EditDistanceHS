@@ -8,9 +8,8 @@ module EditDistance where
    type Memtable = Array MemtableIndex DistScore
 
     
-     
    editDistanceDef :: Eq a => [a] -> [a] -> Maybe Int
-   editDistanceDef x y = editDistance frem fadd fbin x y
+   editDistanceDef = editDistance frem fadd fbin
     where 
       frem = FUn 1 (\x -> Regular 1)
       fadd = FUn 1 (\x -> Regular 1)
