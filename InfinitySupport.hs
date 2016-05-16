@@ -1,17 +1,21 @@
 module InfinitySupport where  
-    
+   
+   --Data type adding infinity support 
    data Infinitable a = Regular a | PositiveInfinity deriving (Eq, Show)
 
+   --Function transforming Infinitable type into Maybe type, natural numbers are Just, PositiveInfinity is Nothing
    infinitableToMaybe :: Infinitable a -> Maybe a
    infinitableToMaybe (Regular a) = Just a
    infinitableToMaybe PositiveInfinity = Nothing
 
+   --Adding support for Ord operations on Infinitable type
    instance Ord a => Ord (Infinitable a) where
       compare PositiveInfinity PositiveInfinity = EQ
       compare PositiveInfinity _ = GT
       compare _ PositiveInfinity = LT
       compare (Regular x) (Regular y) = compare x y    
    
+   --Adding support for basic algebra operations on Infinitable type
    instance (Eq a, Num a) => Num (Infinitable a) where
       negate PositiveInfinity = error "Unsupported operation"
       negate (Regular a) = Regular (negate a)
