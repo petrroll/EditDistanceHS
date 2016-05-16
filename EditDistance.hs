@@ -46,7 +46,7 @@ module EditDistance where
    data UnOp = Del | Add deriving (Eq)
    
    unModOptions :: Memtable -> UnOp -> FUn a -> Array Int a -> MemtableIndex -> [DistScore]
-   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! (getIndex (i, j) x)) + fmod (take x maxSubstring) | x <- [1..maxModified]]
+   unModOptions ar dir (FUn maxlf fmod) str (i, j) = [ (ar ! getIndex (i, j) x) + fmod (take x maxSubstring) | x <- [1..maxModified]]
      where 
        lastModified = minimum [length str - 1, currPos + maxlf - 1]
        maxModified  = lastModified - currPos + 1;
